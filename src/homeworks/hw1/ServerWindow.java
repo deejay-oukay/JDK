@@ -2,7 +2,12 @@ package homeworks.hw1;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class ServerWindow extends JFrame {
     private static final int WIDTH = 400;
@@ -12,6 +17,7 @@ public class ServerWindow extends JFrame {
     private static JTextArea txtArea;
     public static boolean isStarted = false;
     private static ArrayList<ClientGUI> users = new ArrayList<>();
+    private static File log = new File("history.log");
     ServerWindow() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(WIDTH, HEIGHT);
@@ -31,6 +37,7 @@ public class ServerWindow extends JFrame {
         add(txtArea);
         add(pBottom, BorderLayout.SOUTH);
         setVisible(true);
+        btnStart.requestFocus();
     }
 
     private static void serverStart() {
@@ -38,6 +45,7 @@ public class ServerWindow extends JFrame {
         addToLog("Сервер запущен!");
         btnStart.setEnabled(false);
         btnStop.setEnabled(true);
+        btnStop.requestFocus();
     }
 
     private static void serverStop() {
@@ -45,6 +53,7 @@ public class ServerWindow extends JFrame {
         addToLog("Сервер остановлен!");
         btnStop.setEnabled(false);
         btnStart.setEnabled(true);
+        btnStart.requestFocus();
         sendToClients("Вы были отключены от сервера!");
         users.clear();
     }
@@ -59,6 +68,9 @@ public class ServerWindow extends JFrame {
                 return false;
         }
         users.add(newUser);
+        String history = restoreFromFile();
+        sendToClient(newUser, "Вы успешно подключились\n");
+        sendToClient(newUser, restoreFromFile());
         return true;
     }
 
@@ -67,4 +79,36 @@ public class ServerWindow extends JFrame {
             user.messageFromServer(message);
     }
 
+    private static void sendToClient(ClientGUI user, String message) {
+        user.messageFromServer(message);
+    }
+
+    public static boolean isStarted() {
+        return isStarted;
+    }
+
+    public static void getMessage(ClientGUI user, String message) {
+        addToLog(user.getLogin()+": "+message);
+        sendToClients(user.getLogin()+": "+message);
+        saveToFile(user.getLogin()+": "+message);
+    }
+
+    private static void saveToFile(String message) {
+        try (FileWriter fw = new FileWriter(log,true)) {
+            fw.write(message+"\n");
+        } catch (IOException e) {
+            addToLog(e.getMessage());
+        }
+    }
+
+    private static String restoreFromFile() {
+        try (Scanner scanner = new Scanner(log)) {
+            scanner.useDelimiter("\\Z");
+            return(scanner.next());
+        } catch (FileNotFoundException e) {
+            if (e.getMessage() != "history.log (Не удается найти указанный файл)")
+                addToLog(e.getMessage());
+        }
+        return "";
+    }
 }

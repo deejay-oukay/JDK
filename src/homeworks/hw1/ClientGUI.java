@@ -4,17 +4,18 @@ import javax.swing.*;
 import java.awt.*;
 
 public class ClientGUI extends JFrame {
-    private ServerWindow serverWindow;
+    private final ServerWindow serverWindow;
     private static final int WIDTH = 400;
     private static final int HEIGHT = 300;
-    private JButton btnSend;
-    private JTextField txtMessage;
-    private JTextField txtLogin;
-    private JPasswordField txtPassword;
-    private JTextArea txtArea;
+    private final JButton btnSend;
+    private final JTextField txtMessage;
+    private final JTextField txtLogin;
+    private final JPasswordField txtPassword;
+    private final JTextArea txtArea;
     private String login;
-    private JPanel pTop;
+    private final JPanel pTop;
     ClientGUI(ServerWindow serverWindow) {
+        this.serverWindow = serverWindow;
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(WIDTH, HEIGHT);
         setLocationRelativeTo(null);
@@ -84,9 +85,9 @@ public class ClientGUI extends JFrame {
             addToLog("Пароль не указан");
             txtPassword.requestFocus();
         }
-        else if (!serverWindow.isStarted)
+        else if (!ServerWindow.isStarted)
             addToLog("Сервер остановлен");
-        else if (!serverWindow.isLoginCorrect(this))
+        else if (!ServerWindow.isLoginCorrect(this))
         {
             addToLog("Такой логин уже кем-то занят");
             txtLogin.requestFocus();
@@ -105,11 +106,12 @@ public class ClientGUI extends JFrame {
 
     public void messageFromServer(String message) {
         addToLog(message);
-        if (!serverWindow.isStarted())
+        if (!ServerWindow.isStarted())
         {
             pTop.setVisible(true);
             btnSend.setEnabled(false);
             login = "";
+            txtLogin.requestFocus();
         }
     }
 

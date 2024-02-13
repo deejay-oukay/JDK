@@ -16,8 +16,8 @@ public class ServerWindow extends JFrame {
     private static JButton btnStop;
     private static JTextArea txtArea;
     public static boolean isStarted = false;
-    private static ArrayList<ClientGUI> users = new ArrayList<>();
-    private static File log = new File("history.log");
+    private static final ArrayList<ClientGUI> users = new ArrayList<>();
+    private static final File log = new File("history.log");
     ServerWindow() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(WIDTH, HEIGHT);
@@ -68,7 +68,6 @@ public class ServerWindow extends JFrame {
                 return false;
         }
         users.add(newUser);
-        String history = restoreFromFile();
         sendToClient(newUser, "Вы успешно подключились\n");
         sendToClient(newUser, restoreFromFile());
         return true;
@@ -106,7 +105,7 @@ public class ServerWindow extends JFrame {
             scanner.useDelimiter("\\Z");
             return(scanner.next());
         } catch (FileNotFoundException e) {
-            if (e.getMessage() != "history.log (Не удается найти указанный файл)")
+            if (!e.getMessage().equals("history.log (Не удается найти указанный файл)"))
                 addToLog(e.getMessage());
         }
         return "";

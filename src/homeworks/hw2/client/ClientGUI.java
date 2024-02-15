@@ -1,10 +1,12 @@
-package homeworks.hw2;
+package homeworks.hw2.client;
+
+import homeworks.hw2.server.ServerWindow;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class ClientGUI extends JFrame {
-    private final ServerWindow serverWindow;
+//Фронтэнд клиента, который всё знает о бакэнде
+public class ClientGUI extends JFrame implements ClientView {
     private static final int WIDTH = 400;
     private static final int HEIGHT = 300;
     private final JButton btnSend;
@@ -12,10 +14,11 @@ public class ClientGUI extends JFrame {
     private final JTextField txtLogin;
     private final JPasswordField txtPassword;
     private final JTextArea txtArea;
-    private String login;
     private final JPanel pTop;
-    ClientGUI(ServerWindow serverWindow) {
-        this.serverWindow = serverWindow;
+    private ClientView view;
+    private Client client;
+
+    public ClientGUI(ServerWindow serverWindow) {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(WIDTH, HEIGHT);
         setLocationRelativeTo(null);
@@ -31,11 +34,11 @@ public class ClientGUI extends JFrame {
         pSettings.add(txtPort);
         pSettings.add(lSpacer,BorderLayout.EAST);
         txtLogin = new JTextField();
-        txtLogin.addActionListener(e -> login());
+        txtLogin.addActionListener(e -> connectToServer());
         txtPassword = new JPasswordField("12345");
-        txtPassword.addActionListener(e -> login());
+        txtPassword.addActionListener(e -> connectToServer());
         JButton btnLogin = new JButton("login");
-        btnLogin.addActionListener(e -> login());
+        btnLogin.addActionListener(e -> connectToServer());
         JPanel pUserData = new JPanel(new GridLayout(1, 3));
         pUserData.add(txtLogin,BorderLayout.WEST);
         pUserData.add(txtPassword);
@@ -47,9 +50,9 @@ public class ClientGUI extends JFrame {
         add(pTop,BorderLayout.NORTH);
 
         txtMessage = new JTextField();
-        txtMessage.addActionListener(e -> send());
+        txtMessage.addActionListener(e -> sendMessage(txtMessage.getText()));
         btnSend = new JButton("send");
-        btnSend.addActionListener(e -> send());
+        btnSend.addActionListener(e -> sendMessage(txtMessage.getText()));
         btnSend.setEnabled(false);
 
         JPanel pBottom = new JPanel(new GridLayout(1, 2));
@@ -62,42 +65,39 @@ public class ClientGUI extends JFrame {
 
         setVisible(true);
         txtLogin.requestFocus();
+        client = new Client(this, serverWindow.server);
     }
 
-    private void send() {
-        String message = txtMessage.getText();
-        if (!"".equals(message))
-            ServerWindow.getMessage(this,txtMessage.getText());
-        else
-            txtMessage.requestFocus();
-        txtMessage.setText("");
+    @Override
+    public void connectToServer() {
+        int test = client.connectToSever(txtLogin.getText(),txtPassword.getText());
+        switch (test) {
+            case 1:
+                addToLog("Логин не указан");
+                txtLogin.requestFocus();
+                break;
+            case 2:
+                addToLog("Пароль не указан");
+                txtPassword.requestFocus();
+                break;
+            case 3:
+                addToLog("Сервер остановлен");
+                break;
+            case 4:
+                addToLog("Такой логин уже кем-то занят");
+                txtLogin.requestFocus();
+            default:
+                pTop.setVisible(false);
+                btnSend.setEnabled(true);
+                txtMessage.requestFocus();
+                client.setConnected(true);
+                break;
+        }
     }
 
-    private void login() {
-        setLogin(txtLogin.getText());
-        if ("".equals(txtLogin.getText()))
-        {
-            addToLog("Логин не указан");
-            txtLogin.requestFocus();
-        }
-        else if ("".equals(txtPassword.getText()))
-        {
-            addToLog("Пароль не указан");
-            txtPassword.requestFocus();
-        }
-        else if (!ServerWindow.isStarted)
-            addToLog("Сервер остановлен");
-        else if (!ServerWindow.isLoginCorrect(this))
-        {
-            addToLog("Такой логин уже кем-то занят");
-            txtLogin.requestFocus();
-        }
-        else
-        {
-            pTop.setVisible(false);
-            btnSend.setEnabled(true);
-            txtMessage.requestFocus();
-        }
+    @Override
+    public boolean connectedToServer() {
+        return client.isConnected();
     }
 
     private void addToLog(String message) {
@@ -106,20 +106,21 @@ public class ClientGUI extends JFrame {
 
     public void messageFromServer(String message) {
         addToLog(message);
-        if (!ServerWindow.isStarted())
+        if (!connectedToServer())
         {
             pTop.setVisible(true);
             btnSend.setEnabled(false);
-            login = "";
+            client.setName("");
             txtLogin.requestFocus();
         }
     }
 
-    public String getLogin() {
-        return login;
-    }
-
-    private void setLogin(String login) {
-        this.login = login;
+    @Override
+    public void sendMessage(String message) {
+        if (!"".equals(message))
+            client.sendMessage(txtMessage.getText());
+        else
+            txtMessage.requestFocus();
+        txtMessage.setText("");
     }
 }

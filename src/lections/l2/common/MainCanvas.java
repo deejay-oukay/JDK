@@ -8,7 +8,7 @@ import java.awt.*;
 public class MainCanvas extends JPanel {
     private final CanvasRepaintListener controller;
     private long lastFrameTime;
-    MainCanvas(CanvasRepaintListener controller) {
+    public MainCanvas(CanvasRepaintListener controller) {
         this.controller = controller;
         lastFrameTime = System.nanoTime();
     }

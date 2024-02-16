@@ -8,5 +8,5 @@ public interface ServerView {
     void sendToClients(String message);
     void sendToClient(Client user, String message);
     void getMessage(Client user, String message);
-    boolean newUserConnection(Client client);
+    void newUserConnection(Client client);
 }

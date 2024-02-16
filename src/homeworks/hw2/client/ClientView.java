@@ -4,6 +4,7 @@ package homeworks.hw2.client;
 public interface ClientView {
     void sendMessage(String message);
     void connectToServer();
+    void disconnectFromServer();
     boolean connectedToServer();
     void messageFromServer(String message);
 

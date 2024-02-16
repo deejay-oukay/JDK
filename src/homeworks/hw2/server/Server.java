@@ -15,8 +15,11 @@ public class Server {
     private Client client;
     private static boolean isStarted = false;
     private static final ArrayList<Client> users = new ArrayList<>();
-    private static final File log = new File("./history.log");
+    private final File log = new File("src/homeworks/hw2/server/history.log");
 
+    public Server(ServerView view) {
+        this.view = view;
+    }
     public static boolean isStarted() {
         return isStarted;
     }
@@ -26,15 +29,19 @@ public class Server {
 
     public void stop() {
         isStarted = false;
+        for (Client user: users){
+            user.setConnected(false);
+        }
         users.clear();
     }
 
-    public static boolean isLoginCorrect(Client newUser) {
+    public boolean isLoginCorrect(Client newUser) {
         for (Client user: users){
             if (user.getName().equals(newUser.getName()))
                 return false;
         }
         users.add(newUser);
+        view.newUserConnection(newUser);
         return true;
     }
 
@@ -42,7 +49,7 @@ public class Server {
         return users;
     }
 
-    public static void logSaveToFile(String message) throws IOException {
+    public void logSaveToFile(String message) throws IOException {
         try (FileWriter fw = new FileWriter(log,true)) {
             fw.write(message+"\n");
         } catch (IOException e) {
@@ -50,12 +57,12 @@ public class Server {
         }
     }
 
-    public static String historyRestore() throws FileNotFoundException {
+    public String historyRestore() throws FileNotFoundException {
         try (Scanner scanner = new Scanner(log)) {
             scanner.useDelimiter("\\Z");
             return(scanner.next());
         } catch (FileNotFoundException e) {
-            throw new RuntimeException("history.log (Не удается найти указанный файл)");
+            return "";
         }
     }
 
@@ -66,10 +73,9 @@ public class Server {
     public boolean userIsConnected(Client cUser) {
         if (!isStarted)
             return false;
-        for (Client user: users){
+        for (Client user : users)
             if (user.getName().equals(cUser.getName()))
                 return true;
-        }
         return false;
     }
 

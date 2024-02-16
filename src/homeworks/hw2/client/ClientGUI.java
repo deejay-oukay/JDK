@@ -86,6 +86,7 @@ public class ClientGUI extends JFrame implements ClientView {
             case 4:
                 addToLog("Такой логин уже кем-то занят");
                 txtLogin.requestFocus();
+                break;
             default:
                 pTop.setVisible(false);
                 btnSend.setEnabled(true);
@@ -93,6 +94,14 @@ public class ClientGUI extends JFrame implements ClientView {
                 client.setConnected(true);
                 break;
         }
+    }
+
+    @Override
+    public void disconnectFromServer() {
+        pTop.setVisible(true);
+        btnSend.setEnabled(false);
+        client.setName("");
+        txtLogin.requestFocus();
     }
 
     @Override
@@ -106,13 +115,6 @@ public class ClientGUI extends JFrame implements ClientView {
 
     public void messageFromServer(String message) {
         addToLog(message);
-        if (!connectedToServer())
-        {
-            pTop.setVisible(true);
-            btnSend.setEnabled(false);
-            client.setName("");
-            txtLogin.requestFocus();
-        }
     }
 
     @Override

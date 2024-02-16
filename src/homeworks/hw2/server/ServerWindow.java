@@ -1,12 +1,12 @@
 package homeworks.hw2.server;
 
 import homeworks.hw2.client.Client;
+import homeworks.hw2.client.ClientGUI;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Scanner;
 
 //Фронтэнд Сервера, который всё знает о фронтэнде
 public class ServerWindow extends JFrame implements ServerView {
@@ -36,6 +36,7 @@ public class ServerWindow extends JFrame implements ServerView {
         add(pBottom, BorderLayout.SOUTH);
         setVisible(true);
         btnStart.requestFocus();
+        server = new Server(this);
     }
 
     private void serverStart() {
@@ -48,7 +49,11 @@ public class ServerWindow extends JFrame implements ServerView {
 
     private void serverStop() {
         addToLog("Сервер остановлен!");
+        sendToClients("Вы были отключены от сервера!");
         server.stop();
+        btnStart.setEnabled(true);
+        btnStop.setEnabled(false);
+        btnStart.requestFocus();
     }
 
     private static void addToLog(String message) {
@@ -67,20 +72,13 @@ public class ServerWindow extends JFrame implements ServerView {
     }
 
     @Override
-    public boolean newUserConnection(Client client) {
-        if (Server.isLoginCorrect(client)) {
-            sendToClient(client, "Вы успешно подключились\n");
-
-            try {
-                sendToClient(client, server.historyRestore());
-            } catch (FileNotFoundException e) {
-                addToLog(e.getMessage());
-            }
-            finally {
-                return true;
-            }
+    public void newUserConnection(Client client) {
+        try {
+            sendToClient(client, "Вы успешно подключились!");
+            sendToClient(client, server.historyRestore());
+        } catch (FileNotFoundException e) {
+            addToLog("Файл с историей не найден");
         }
-        return false;
     }
 
     @Override

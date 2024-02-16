@@ -1,12 +1,12 @@
 package homeworks.hw2.client;
 
 import homeworks.hw2.server.Server;
-import homeworks.hw2.server.ServerWindow;
 
 //Бакэнд клиента, который ничего не знает о фронтэнде
 public class Client {
     private ClientView view;
     private String name;
+    private String password;
     private final Server server;
     private boolean connected = false;
 
@@ -21,6 +21,10 @@ public class Client {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     public int connectToSever(String login, String password) {
@@ -42,12 +46,13 @@ public class Client {
     }
 
     public boolean isConnected() {
-        connected = server.userIsConnected(this);
-        return connected;
+        return server.userIsConnected(this);
     }
 
     public void setConnected(boolean connected) {
         this.connected = connected;
+        if (!connected)
+            view.disconnectFromServer();
     }
 
     public void messageFromServer(String message) {

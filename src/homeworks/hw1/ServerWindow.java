@@ -17,7 +17,7 @@ public class ServerWindow extends JFrame {
     private static JTextArea txtArea;
     public static boolean isStarted = false;
     private static final ArrayList<ClientGUI> users = new ArrayList<>();
-    private static final File log = new File("history.log");
+    private static final File log = new File("homeworks/hw2/server/history.log");
     ServerWindow() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(WIDTH, HEIGHT);
